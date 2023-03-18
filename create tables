@@ -1,0 +1,83 @@
+create table data_customers (
+id_customer INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+last_name VARCHAR(45) NOT NULL,
+name VARCHAR(45) NOT NULL,
+middle_name VARCHAR(45),
+telephone_number VARCHAR(11) NOT NULL UNIQUE
+);
+
+create table income (
+id_payment INT NOT NULL AUTO_INCREMENT,
+date DATE NOT NULL, 
+payment_method VARCHAR(45) NOT NULL,
+amount INT NOT NULL,
+customer_id INT NOT NULL,
+article_income_id INT NOT NULL,
+product_id INT,
+PRIMARY KEY(id_payment,customer_id)
+);
+
+create table list_incomes (
+id_article_income INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+name_article_income VARCHAR(45) NOT NULL
+);
+
+create table price_list (
+id_product INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+name_product VARCHAR(45) UNIQUE NOT NULL,
+product_price FLOAT UNSIGNED NOT NULL
+);
+
+create table outcome  (
+id_payment INT NOT NULL AUTO_INCREMENT,
+date DATE NOT NULL, 
+payment_method VARCHAR(45) NOT NULL,
+amount FLOAT UNSIGNED NOT NULL, 
+customer_id INT, 
+article_outcome_id INT NOT NULL,
+employee_id INT,
+PRIMARY KEY(id_payment)
+);
+
+create table list_outcomes (
+id_article_outcome INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+name_article_outcome VARCHAR(45) NOT NULL
+);
+
+create table employees (
+id_employee INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+last_name VARCHAR(45) NOT NULL,
+name VARCHAR(45) NOT NULL,
+middle_name VARCHAR(45),
+KPI FLOAT CHECK (KPI >= 0 AND KPI <= 1) NOT NULL,
+position_id INT NOT NULL
+);
+
+create table positions (
+id_position INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+name_position VARCHAR(45) UNIQUE NOT NULL,
+salary FLOAT
+);
+
+
+
+ALTER TABLE income
+ADD CONSTRAINT FK_income_to_data_customers FOREIGN KEY (customer_id) REFERENCES data_customers (id_customer) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+ALTER TABLE income
+ADD CONSTRAINT FK_income_to_list_incomes FOREIGN KEY (article_income_id) REFERENCES list_incomes (id_article_income) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+ALTER TABLE income
+ADD CONSTRAINT FK_income_to_price_list FOREIGN KEY (product_id) REFERENCES price_list (id_product) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+ALTER TABLE outcome
+ADD CONSTRAINT FK_outcome_to_data_customers FOREIGN KEY (customer_id) REFERENCES data_customers (id_customer) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+ALTER TABLE outcome
+ADD CONSTRAINT FK_outcome_to_list_outcomes FOREIGN KEY (article_outcome_id) REFERENCES list_outcomes (id_article_outcome) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+ALTER TABLE outcome
+ADD CONSTRAINT FK_outcome_to_employees FOREIGN KEY (employee_id) REFERENCES employees (id_employee) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+ALTER TABLE employees
+ADD CONSTRAINT FK_employees_to_positions FOREIGN KEY (position_id) REFERENCES positions (id_position) ON DELETE RESTRICT ON UPDATE CASCADE;
