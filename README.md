@@ -13,3 +13,4 @@
 После того, как логическая и физическая модели базы данных сформированы, я создал саму базу данных и набор таблиц, которые будут хранить данные.  
   
   ![image](https://user-images.githubusercontent.com/99638036/226167101-e663d211-5ed2-4133-8282-5c379b0f1c71.png)
+https://github.com/nikitamayorovvv/financedb/blob/main/create%20tables
