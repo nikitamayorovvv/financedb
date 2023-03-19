@@ -14,3 +14,4 @@
   
   ![image](https://user-images.githubusercontent.com/99638036/226167101-e663d211-5ed2-4133-8282-5c379b0f1c71.png)
 https://github.com/nikitamayorovvv/financedb/blob/main/create%20tables
+https://github.com/nikitamayorovvv/financedb/blob/5ea90c9965a7043a35364a8591067f0fff8e90a4/create%20tables
