@@ -231,6 +231,35 @@ INSERT INTO positions (name_position, salary) VALUES
     
   ![image](https://user-images.githubusercontent.com/99638036/226463226-192312aa-f25f-4333-8052-c40b3ecc7fe6.png)  
     
- После я выполнил еще несколько запросов, их можно найти в [этом файле]()
+ После я выполнил еще несколько запросов, их можно найти в [этом файле](https://github.com/nikitamayorovvv/financedb/blob/main/database%20queries.txt)
  ### Создание хранимых процедур, функций и триггеров
- И наконец, я добрался до самой сложной, но от этого самой интересной части работы - это создание фунцкий и триггеров. Я старался написать максимально практичные функции и триггеры, которые могли бы сильно упростить работу мне, как администратору автошколы, который формирует короткие финансовые отчеты. 
+ И наконец, я добрался до самой сложной, но от этого самой интересной части работы - это создание фунцкий и триггеров. Я старался написать максимально практичные функции и триггеры, которые могли бы сильно упростить работу мне, как администратору автошколы, который формирует короткие финансовые отчеты. Вот несколько из них, остальные можно посмотреть в [этом файле](https://github.com/nikitamayorovvv/financedb/blob/main/stored%20procedures.txt)
+Например, вот функция, которая считает ЗП исходя из базового оклада и показателя эффективности сотрудника (KPI), но знать ей нужно лишь ФИО сотрудника, остальное она сама подтянет из БД.  
+```
+DROP FUNCTION IF EXISTS func_zp;
+
+delimiter $$
+CREATE FUNCTION func_zp(ln VARCHAR(45),n VARCHAR(45), mn VARCHAR(45))     
+RETURNS FLOAT
+DETERMINISTIC
+BEGIN
+	DECLARE zp FLOAT DEFAULT 0;
+	DECLARE idd INT DEFAULT 0;
+	DECLARE sal FLOAT DEFAULT 0;
+	DECLARE kp FLOAT DEFAULT 0;
+	SELECT id_employee FROM employees 
+	WHERE last_name=ln AND name=n AND middle_name=mn INTO idd;
+	SELECT salary FROM employees 
+	INNER JOIN positions ON employees.position_id=positions.id_position  
+	WHERE id_employee = idd INTO sal;
+	SELECT KPI FROM employees 
+	INNER JOIN positions ON employees.position_id=positions.id_position  
+	WHERE id_employee = idd INTO kp;
+	SET zp=sal*(1+kp);
+	RETURN zp; 
+END$$
+delimiter ;
+
+SELECT func_zp('Майоров', 'Никита', 'Александрович');
+```
+Вызов функции ниже на рисунке:
