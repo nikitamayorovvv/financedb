@@ -232,7 +232,7 @@ INSERT INTO positions (name_position, salary) VALUES
   ![image](https://user-images.githubusercontent.com/99638036/226463226-192312aa-f25f-4333-8052-c40b3ecc7fe6.png)  
     
  После я выполнил еще несколько запросов, их можно найти в [этом файле](https://github.com/nikitamayorovvv/financedb/blob/main/database%20queries.txt)
- ### Создание хранимых процедур, функций и триггеров
+ ### Создание функций и триггеров
  И наконец, я добрался до самой сложной, но от этого самой интересной части работы - это создание фунцкий и триггеров. Я старался написать максимально практичные функции и триггеры, которые могли бы сильно упростить работу мне, как администратору автошколы, который формирует короткие финансовые отчеты. Ниже разобраны некоторые из них, остальные можно посмотреть в [этом файле](https://github.com/nikitamayorovvv/financedb/blob/main/stored%20procedures.txt)  
  
 Например, вот функция, которая считает ЗП исходя из базового оклада и показателя эффективности сотрудника (KPI), но знать ей нужно лишь ФИО сотрудника, остальное она сама подтянет из БД.  
@@ -297,7 +297,7 @@ SELECT func_middle_chek('2022-10-03','2022-11-09');
 Результат работы функции представлен на рисунке ниже:  
 ![image](https://user-images.githubusercontent.com/99638036/226471754-ad958d2d-f402-403d-8752-8711778aba0f.png)  
   
-Следующая функция не менее полезная: она позволяет считать бухгалтерский баланс:
+Следующая функция не менее полезная: она позволяет считать бухгалтерский баланс
 ```
 DROP FUNCTION IF EXISTS func_balance;
 
@@ -321,7 +321,24 @@ SELECT func_balance();
 ```
 Результат работы функции ниже:  
 ![image](https://user-images.githubusercontent.com/99638036/226472148-22f1ff43-afe1-46fb-9a46-a6f1488a1891.png)  
-  
-  
+    
+Также я создал триггер, исправляющий некорректную запись значения в столбец с методом оплаты: 
+```
+CREATE TRIGGER newtrg3
+BEFORE INSERT ON income
+FOR EACH ROW
+BEGIN 
+	SET NEW.payment_method = CONCAT(UPPER(LEFT(NEW.payment_method , 1)), LOWER(SUBSTRING(NEW.payment_method, 2)));
+	IF NEW.payment_method = 'Card' OR NEW.payment_method = 'Картой' THEN
+		SET NEW.payment_method = 'Карта';
+	END IF;
+END;
+$$
+```
+Проверка работы триггера:  
+Добавляем строку с некорректным значением в столбце "payment_method"
+![image](https://user-images.githubusercontent.com/99638036/226473241-a8c24e2b-794d-42dd-a6cd-bc9651155536.png)  
+Видим, что созданный мной триггер исправил эту ошибку
+![image](https://user-images.githubusercontent.com/99638036/226473273-d2129e39-a94d-45e7-8edd-1b0d1e6257e2.png)
 
 
