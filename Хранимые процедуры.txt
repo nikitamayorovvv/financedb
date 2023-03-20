@@ -1,0 +1,242 @@
+#Процедура, которая выводит кол-во входящих платежей в определенную дату
+DROP PROCEDURE IF EXISTS sp_kolvo_p;
+
+delimiter $$
+CREATE PROCEDURE sp_kolvo_p(IN d DATE)
+BEGIN
+	SELECT count(*) from income
+	WHERE date = d;
+END$$
+delimiter ;
+
+CALL sp_kolvo_p('2022-10-03');
+
+#Процедура, которая выводит ФИО тех сотрудников, чей KPI был выше определенного значения
+
+DROP PROCEDURE IF EXISTS sp_kpi;
+
+delimiter $$
+CREATE PROCEDURE sp_kpi(IN kp FLOAT)
+BEGIN
+	SELECT last_name, name, middle_name from employees
+	WHERE KPI > kp;
+END$$
+delimiter ;
+
+CALL sp_kpi(0.5);
+
+#Процедура, которая выводит список учеников, которые не заплатили за курс до конца
+
+DROP PROCEDURE IF EXISTS sp_debt;
+
+delimiter $$
+CREATE PROCEDURE sp_debt()
+BEGIN
+	SELECT last_name, name, middle_name, amount, product_price, sum(amount) AS sum_p from data_customers 
+	INNER JOIN income ON data_customers.id_customer=income.customer_id 
+	INNER JOIN price_list ON income.product_id=price_list.id_product
+	GROUP BY id_customer
+	HAVING sum(amount) >= product_price;
+END$$
+delimiter ;
+
+CALL sp_debt();
+
+#Процедура, которая выводит платежи за определенный промежуток времени
+
+DROP PROCEDURE IF EXISTS sp_payment_for_period;
+
+delimiter $$
+CREATE PROCEDURE sp_payment_for_period(IN fd DATE, IN sd DATE)
+BEGIN
+	SELECT last_name, name, middle_name, amount, name_product from data_customers 
+	INNER JOIN income ON data_customers.id_customer=income.customer_id 
+	INNER JOIN price_list ON income.product_id=price_list.id_product
+	WHERE date BETWEEN fd and sd;
+END$$
+delimiter ;
+
+CALL sp_payment_for_period('2022-10-03','2022-11-09');
+
+
+#Функция, которая считает ЗП исходя из базового оклада и показателя эффективности сотрудника (KPI)
+
+DROP FUNCTION IF EXISTS func_zp_simple;
+
+delimiter $$
+CREATE FUNCTION func_zp_simple(sal FLOAT, kp FLOAT)     
+RETURNS FLOAT
+DETERMINISTIC
+BEGIN
+	DECLARE zp FLOAT DEFAULT 0;
+	SET zp=sal*(1+kp);
+	RETURN zp; 
+END$$
+delimiter ;
+
+SELECT func_zp_simple(20000, 0.5);
+
+
+#Функция, которая может посчитать ЗП только по ФИО сотрудника
+
+DROP FUNCTION IF EXISTS func_zp;
+
+delimiter $$
+CREATE FUNCTION func_zp(ln VARCHAR(45),n VARCHAR(45), mn VARCHAR(45))     
+RETURNS FLOAT
+DETERMINISTIC
+BEGIN
+	DECLARE zp FLOAT DEFAULT 0;
+	DECLARE idd INT DEFAULT 0;
+	DECLARE sal FLOAT DEFAULT 0;
+	DECLARE kp FLOAT DEFAULT 0;
+	SELECT id_employee FROM employees 
+	WHERE last_name=ln AND name=n AND middle_name=mn INTO idd;
+	SELECT salary FROM employees 
+	INNER JOIN positions ON employees.position_id=positions.id_position  
+	WHERE id_employee = idd INTO sal;
+	SELECT KPI FROM employees 
+	INNER JOIN positions ON employees.position_id=positions.id_position  
+	WHERE id_employee = idd INTO kp;
+	SET zp=sal*(1+kp);
+	RETURN zp; 
+END$$
+delimiter ;
+
+SELECT func_zp('Майоров', 'Никита', 'Александрович');
+
+#Функция, которая считает средний чек от продаж в определенный период
+
+DROP FUNCTION IF EXISTS func_middle_chek;
+
+delimiter $$
+CREATE FUNCTION func_middle_chek(fd DATE, sd DATE)   
+RETURNS FLOAT
+DETERMINISTIC
+BEGIN
+	DECLARE sum_inc FLOAT DEFAULT 0;
+	DECLARE count_chek FLOAT DEFAULT 0;
+	DECLARE mid_chek FLOAT DEFAULT 0;
+
+	SELECT sum(amount) FROM income
+	WHERE article_income_id = 1 AND
+	date BETWEEN fd and sd INTO sum_inc;
+	SELECT count(amount) FROM income
+	WHERE article_income_id = 1 AND
+	date BETWEEN fd and sd INTO count_chek;
+	SET mid_chek=sum_inc/count_chek;
+	
+	RETURN mid_chek; 
+END$$
+delimiter ;
+
+SELECT func_middle_chek('2022-10-03','2022-11-09');
+
+#Функция, которая считает бух.балланс
+
+DROP FUNCTION IF EXISTS func_balance;
+
+delimiter $$
+CREATE FUNCTION func_balance()     
+RETURNS FLOAT
+DETERMINISTIC
+BEGIN
+	DECLARE inc FLOAT DEFAULT 0;
+	DECLARE outc INT DEFAULT 0;
+	DECLARE bal FLOAT DEFAULT 0;
+
+	SELECT sum(amount) FROM income INTO inc;
+	SELECT sum(amount) FROM outcome INTO outc;
+	SET bal=inc-outc;
+	RETURN bal; 
+END$$
+delimiter ;
+
+SELECT func_balance();
+
+#Тригер 1
+DROP TRIGGER IF EXISTS newtrg;
+delimiter $$
+
+CREATE TRIGGER newtrg
+BEFORE INSERT ON  data_customers
+FOR EACH ROW
+BEGIN 
+SET NEW.last_name = CONCAT(UPPER(LEFT(NEW.last_name , 1) ), LOWER(SUBSTRING(NEW.last_name, 2) ) );
+END;
+$$
+
+#TEST
+delimiter ;
+
+INSERT INTO data_customers (last_name, name, middle_name, telephone_number) VALUES
+('КОЗЛОВ', 'Савелий', 'Петрович', '86951736062');
+
+
+#Тригер 2
+
+DROP TRIGGER IF EXISTS newtrg2;
+
+delimiter $$
+
+CREATE TRIGGER newtrg2
+BEFORE INSERT ON income
+FOR EACH ROW
+BEGIN 
+IF NEW.product_id IS NOT NULL THEN
+	SET NEW.article_income_id=1;
+END IF;
+END;
+$$
+
+#TEST
+delimiter ;
+
+INSERT INTO income (date, payment_method, amount, customer_id, article_income_id, product_id) VALUES
+('2022-11-03', 'Наличные', '13300', '9', '6', '1');
+
+
+#Тригер 3
+
+DROP TRIGGER IF EXISTS newtrg3;
+
+delimiter $$
+
+CREATE TRIGGER newtrg3
+BEFORE INSERT ON income
+FOR EACH ROW
+BEGIN 
+	SET NEW.payment_method = CONCAT(UPPER(LEFT(NEW.payment_method , 1)), LOWER(SUBSTRING(NEW.payment_method, 2)));
+	IF NEW.payment_method = 'Card' OR NEW.payment_method = 'Картой' THEN
+		SET NEW.payment_method = 'Карта';
+	END IF;
+END;
+$$
+
+#TEST
+delimiter ;
+INSERT INTO income (date, payment_method, amount, customer_id, article_income_id, product_id) VALUES
+('2022-11-03', 'CARD', '13300', '12', '1', '1');
+
+#Триггер 5
+
+DROP TRIGGER IF EXISTS newtrg5;
+
+delimiter $$
+
+CREATE TRIGGER newtrg5
+BEFORE INSERT ON data_customers
+FOR EACH ROW
+BEGIN 
+	IF NEW.middle_name = ' ' THEN
+		SET NEW.middle_name = NONE;
+	END IF;
+END;
+$$
+
+#TEST
+delimiter ;
+
+INSERT INTO data_customers (last_name, name, middle_name, telephone_number) VALUES
+('Вуань', 'Кхэ', '', '89095173062');
+

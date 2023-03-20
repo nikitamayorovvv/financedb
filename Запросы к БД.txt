@@ -1,0 +1,80 @@
+
+#pdf2
+SELECT * FROM income WHERE customer_id=2;
+SELECT * FROM income WHERE customer_id>2;
+SELECT * FROM income WHERE customer_id<5;
+SELECT * FROM income WHERE customer_id>=2;
+SELECT * FROM income WHERE customer_id<=5;
+SELECT * FROM income WHERE customer_id!=2;
+SELECT * FROM income WHERE product_id IS NOT NULL;
+SELECT * FROM income WHERE product_id IS NULL;
+SELECT * FROM income WHERE customer_id BETWEEN 1 AND 3;
+SELECT * FROM income WHERE customer_id IN (1, 4);
+SELECT * FROM income WHERE customer_id NOT IN (1, 4);
+SELECT * FROM data_customers WHERE last_name LIKE '%ова';
+SELECT * FROM data_customers WHERE last_name NOT LIKE '%ова';
+
+#PDF3
+SELECT last_name, name, middle_name FROM data_customers;
+
+SELECT last_name, name, middle_name, date, amount, article_income_id FROM data_customers, income 
+WHERE amount>5000 AND 
+data_customers.id_customer=income.customer_id;
+
+SELECT last_name, name, middle_name, date, amount, article_income_id FROM data_customers 
+INNER JOIN income ON data_customers.id_customer=income.customer_id
+WHERE amount>5000;
+
+SELECT last_name, name, middle_name, date, amount, article_income_id FROM data_customers 
+INNER JOIN income ON data_customers.id_customer=income.customer_id
+WHERE amount=8900 OR amount=13300;
+
+(SELECT last_name, name, middle_name, date, amount, article_income_id FROM data_customers 
+INNER JOIN income ON data_customers.id_customer=income.customer_id
+WHERE amount=8900)
+UNION
+(SELECT last_name, name, middle_name, date, amount, article_income_id FROM data_customers 
+INNER JOIN income ON data_customers.id_customer=income.customer_id
+WHERE amount=13300);
+
+SELECT last_name, name, middle_name, date, amount, article_income_id FROM data_customers 
+INNER JOIN income ON data_customers.id_customer=income.customer_id
+WHERE amount>3000 AND article_income_id=2;
+
+SELECT id_employee, last_name, name, middle_name FROM employees 
+WHERE NOT EXISTS (SELECT employee_id, last_name, name, middle_name FROM outcome);
+
+SELECT id_employee, last_name, name, middle_name FROM employees 
+WHERE EXISTS (SELECT employee_id, last_name, name, middle_name FROM outcome);
+
+SELECT article_income_id, COUNT(*) AS kolvo FROM income WHERE amount>3000 GROUP BY article_income_id;
+
+SELECT article_income_id, COUNT(*) AS kolvo FROM income WHERE amount>3000 GROUP BY article_income_id HAVING COUNT(*)=10;
+
+
+SELECT article_income_id, SUM(amount) AS summa FROM income GROUP BY article_income_id;
+
+SELECT article_income_id, AVG(amount) AS summa FROM income GROUP BY article_income_id;
+
+SELECT article_income_id, MIN(amount) AS summa FROM income GROUP BY article_income_id;
+
+SELECT article_income_id, MAX(amount) AS summa FROM income GROUP BY article_income_id;
+
+
+
+
+
+
+#############################
+
+DELETE middle_name FROM data_customer WHERE middle_name = " "
+
+SELECT * FROM data_customers;
+SELECT * FROM income;
+SELECT * FROM list_incomes;
+SELECT * FROM price_list;
+SELECT * FROM outcome;
+SELECT * FROM list_outcomes;
+SELECT * FROM employees;
+
+ALTER TABLE income ALTER COLUMN data DATE_FORMAT(CURDATE(), '%d.%m.%Y');;
