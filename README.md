@@ -233,7 +233,8 @@ INSERT INTO positions (name_position, salary) VALUES
     
  После я выполнил еще несколько запросов, их можно найти в [этом файле](https://github.com/nikitamayorovvv/financedb/blob/main/database%20queries.txt)
  ### Создание хранимых процедур, функций и триггеров
- И наконец, я добрался до самой сложной, но от этого самой интересной части работы - это создание фунцкий и триггеров. Я старался написать максимально практичные функции и триггеры, которые могли бы сильно упростить работу мне, как администратору автошколы, который формирует короткие финансовые отчеты. Вот несколько из них, остальные можно посмотреть в [этом файле](https://github.com/nikitamayorovvv/financedb/blob/main/stored%20procedures.txt)
+ И наконец, я добрался до самой сложной, но от этого самой интересной части работы - это создание фунцкий и триггеров. Я старался написать максимально практичные функции и триггеры, которые могли бы сильно упростить работу мне, как администратору автошколы, который формирует короткие финансовые отчеты. Ниже разобраны некоторые из них, остальные можно посмотреть в [этом файле](https://github.com/nikitamayorovvv/financedb/blob/main/stored%20procedures.txt)  
+ 
 Например, вот функция, которая считает ЗП исходя из базового оклада и показателя эффективности сотрудника (KPI), но знать ей нужно лишь ФИО сотрудника, остальное она сама подтянет из БД.  
 ```
 DROP FUNCTION IF EXISTS func_zp;
@@ -262,4 +263,65 @@ delimiter ;
 
 SELECT func_zp('Майоров', 'Никита', 'Александрович');
 ```
-Вызов функции ниже на рисунке:
+Вызов функции ниже на рисунке:  
+
+![image](https://user-images.githubusercontent.com/99638036/226471250-1f54a921-af11-4072-a1d2-5bd275fcf268.png)  
+  
+ Следующая функция считает средний чек от продаж в определенный период:
+ ```
+ DROP FUNCTION IF EXISTS func_middle_chek;
+
+delimiter $$
+CREATE FUNCTION func_middle_chek(fd DATE, sd DATE)   
+RETURNS FLOAT
+DETERMINISTIC
+BEGIN
+	DECLARE sum_inc FLOAT DEFAULT 0;
+	DECLARE count_chek FLOAT DEFAULT 0;
+	DECLARE mid_chek FLOAT DEFAULT 0;
+
+	SELECT sum(amount) FROM income
+	WHERE article_income_id = 1 AND
+	date BETWEEN fd and sd INTO sum_inc;
+	SELECT count(amount) FROM income
+	WHERE article_income_id = 1 AND
+	date BETWEEN fd and sd INTO count_chek;
+	SET mid_chek=sum_inc/count_chek;
+	
+	RETURN mid_chek; 
+END$$
+delimiter ;
+
+SELECT func_middle_chek('2022-10-03','2022-11-09');
+```
+Результат работы функции представлен на рисунке ниже:  
+![image](https://user-images.githubusercontent.com/99638036/226471754-ad958d2d-f402-403d-8752-8711778aba0f.png)  
+  
+Следующая функция не менее полезная: она позволяет считать бухгалтерский баланс:
+```
+DROP FUNCTION IF EXISTS func_balance;
+
+delimiter $$
+CREATE FUNCTION func_balance()     
+RETURNS FLOAT
+DETERMINISTIC
+BEGIN
+	DECLARE inc FLOAT DEFAULT 0;
+	DECLARE outc INT DEFAULT 0;
+	DECLARE bal FLOAT DEFAULT 0;
+
+	SELECT sum(amount) FROM income INTO inc;
+	SELECT sum(amount) FROM outcome INTO outc;
+	SET bal=inc-outc;
+	RETURN bal; 
+END$$
+delimiter ;
+
+SELECT func_balance();
+```
+Результат работы функции ниже:  
+![image](https://user-images.githubusercontent.com/99638036/226472148-22f1ff43-afe1-46fb-9a46-a6f1488a1891.png)  
+  
+  
+
+
