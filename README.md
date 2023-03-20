@@ -229,6 +229,6 @@ INSERT INTO positions (name_position, salary) VALUES
     
   Затем выполнил еще несколько запросов с оператором JOIN  
     
-    ![image](https://user-images.githubusercontent.com/99638036/226463226-192312aa-f25f-4333-8052-c40b3ecc7fe6.png)  
-      
-      После я выполнил еще несколько запросов, их можно найти в [этом файле]
+  ![image](https://user-images.githubusercontent.com/99638036/226463226-192312aa-f25f-4333-8052-c40b3ecc7fe6.png)  
+    
+ После я выполнил еще несколько запросов, их можно найти в [этом файле]()
