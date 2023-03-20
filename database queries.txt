@@ -1,5 +1,3 @@
-
-#pdf2
 SELECT * FROM income WHERE customer_id=2;
 SELECT * FROM income WHERE customer_id>2;
 SELECT * FROM income WHERE customer_id<5;
@@ -14,7 +12,7 @@ SELECT * FROM income WHERE customer_id NOT IN (1, 4);
 SELECT * FROM data_customers WHERE last_name LIKE '%ова';
 SELECT * FROM data_customers WHERE last_name NOT LIKE '%ова';
 
-#PDF3
+
 SELECT last_name, name, middle_name FROM data_customers;
 
 SELECT last_name, name, middle_name, date, amount, article_income_id FROM data_customers, income 
@@ -59,22 +57,3 @@ SELECT article_income_id, AVG(amount) AS summa FROM income GROUP BY article_inco
 SELECT article_income_id, MIN(amount) AS summa FROM income GROUP BY article_income_id;
 
 SELECT article_income_id, MAX(amount) AS summa FROM income GROUP BY article_income_id;
-
-
-
-
-
-
-#############################
-
-DELETE middle_name FROM data_customer WHERE middle_name = " "
-
-SELECT * FROM data_customers;
-SELECT * FROM income;
-SELECT * FROM list_incomes;
-SELECT * FROM price_list;
-SELECT * FROM outcome;
-SELECT * FROM list_outcomes;
-SELECT * FROM employees;
-
-ALTER TABLE income ALTER COLUMN data DATE_FORMAT(CURDATE(), '%d.%m.%Y');;
