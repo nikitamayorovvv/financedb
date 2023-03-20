@@ -12,9 +12,11 @@
 ### Создание базы данных и таблиц
 После того, как логическая и физическая модели базы данных сформированы, я создал саму базу данных и набор таблиц, которые будут хранить данные.  
   
-  ![image](https://user-images.githubusercontent.com/99638036/226167101-e663d211-5ed2-4133-8282-5c379b0f1c71.png)
-
-https://github.com/nikitamayorovvv/financedb/blob/main/create%20tables
+  ![image](https://user-images.githubusercontent.com/99638036/226167101-e663d211-5ed2-4133-8282-5c379b0f1c71.png)  
+    
+    
+ С помощью [этого скрипта]( https://github.com/nikitamayorovvv/financedb/blob/main/create%20tables), я создал все необходимые таблицы:  
+    
 ```
 create table income (
 id_payment INT NOT NULL AUTO_INCREMENT,
@@ -93,7 +95,7 @@ ALTER TABLE employees
 ADD CONSTRAINT FK_employees_to_positions FOREIGN KEY (position_id) REFERENCES positions (id_position) ON DELETE RESTRICT ON UPDATE CASCADE;
 ```
 ### Заполнение базы данных и таблиц
-После того, как база данных и ее таблицы были созданы, я заполнил их данными.
+После того, как база данных и ее таблицы были созданы, я заполнил их синтезированными данными.
 
 ```
 INSERT INTO data_customers (last_name, name, middle_name, telephone_number) VALUES
@@ -201,14 +203,14 @@ INSERT INTO list_outcomes (name_article_outcome) VALUES
 
 INSERT INTO employees (last_name, name, middle_name, KPI, position_id) VALUES
 ('Потапов', 'Сергей', 'Викторович', '0.6','1'),
-('Афонин', 'Анатолий', 'Евгеньевич', '0.9','2'),
-('Богомолов', 'Алексей', 'Александрович', '0.8','2'),
-('Боденов', 'Александр', 'Михайлович', '0.7','2'),
-('Трунова', 'Евгения', 'Петровна', '0.7','1'),
+('Абзалов', 'Анатолий', 'Евгеньевич', '0.9','2'),
+('Богомольный', 'Алексей', 'Александрович', '0.8','2'),
+('Бодоев', 'Александр', 'Михайлович', '0.7','2'),
+('Трунникова', 'Евгения', 'Петровна', '0.7','1'),
 ('Кузьмина', 'Анна', 'Андреевна', '0.6','4'),
-('Фаттахов', 'Роман', 'Ахмедович', '0.4','2'),
+('Фаттанов', 'Роман', 'Ахмедович', '0.4','2'),
 ('Майоров', 'Никита', 'Александрович', '0.9','3'),
-('Казирод', 'Иван', 'Петрович', '1','2'),
+('Дукельский', 'Иван', 'Петрович', '1','2'),
 ('Сосновский', 'Александр', 'Рудольфович', '1','5');
 
 INSERT INTO positions (name_position, salary) VALUES
