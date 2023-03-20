@@ -336,9 +336,31 @@ END;
 $$
 ```
 Проверка работы триггера:  
-Добавляем строку с некорректным значением в столбце "payment_method"
+
+Добавляем строку с некорректным значением в столбце "payment_method"  
+
 ![image](https://user-images.githubusercontent.com/99638036/226473241-a8c24e2b-794d-42dd-a6cd-bc9651155536.png)  
-Видим, что созданный мной триггер исправил эту ошибку
-![image](https://user-images.githubusercontent.com/99638036/226473273-d2129e39-a94d-45e7-8edd-1b0d1e6257e2.png)
+Видим, что созданный мной триггер исправил эту ошибку  
+
+![image](https://user-images.githubusercontent.com/99638036/226473273-d2129e39-a94d-45e7-8edd-1b0d1e6257e2.png)  
+  
+  
+В нашей автошколе было очень много иностранных учеников, у которых чаще всего нет отчества, поэтому я написал триггер, заменяющий пустые значения в столбце с отчеством клиента на NONE:
+```
+CREATE TRIGGER newtrg5
+BEFORE INSERT ON data_customers
+FOR EACH ROW
+BEGIN 
+	IF NEW.middle_name = ' ' THEN
+		SET NEW.middle_name = NONE;
+	END IF;
+END;
+$$
+```
+Попробуем добавить информацию о новом ученике:  
+![image](https://user-images.githubusercontent.com/99638036/226474307-182a0587-a74e-4f47-92d0-95fb0339745d.png)  
+Видим, что благодаря триггеру столбец с отчеством заполнился не пробелом, а значением NONE:  
+![image](https://user-images.githubusercontent.com/99638036/226474529-13c02022-f088-4276-bf6a-16f9c77774f8.png)
+
 
 
